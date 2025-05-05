@@ -13,7 +13,9 @@ export type EventRow = {
 };
 
 export async function getEvents(): Promise<EventRow[]> {
-  return [];
+  const{ rows } = 
+    await sql<EventRow>`SELECT * FROM events ORDER BY start_time ASC`;
+  return rows;
 }
 export async function createEvent(_: FormData) {}
 export async function updateEvent(_: FormData) {}
