@@ -35,9 +35,9 @@ export default async function Home({searchParams,}:{searchParams: {error?: strin
       {events.length === 0 ? (
         <p>No Events Scheduled</p>
       ) : (
-        <ul>
+        <ul className="space-y-4 px-4">
           {events.map((e) => (
-            <li key={e.id}>
+            <li key={e.id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
               <details key={e.id + e.start_time + e.end_time}>
                 <summary>
                 {e.title} — {e.location} ({pretty(e.start_time)} → {pretty(e.end_time)}) – Edit
