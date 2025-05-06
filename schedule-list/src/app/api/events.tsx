@@ -2,6 +2,7 @@
 
 import { sql } from './database';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export type EventRow = {
     id: string;
@@ -20,11 +21,19 @@ export async function getEvents(): Promise<EventRow[]> {
 
 export async function createEvent(form: FormData) {
     const { title, location, description, start, end } = Object.fromEntries(form) as Record<string, string>;
+
+    const tStart = new Date(start.replace(' ', 'T'));
+    const tEnd   = new Date(end.replace(' ', 'T'));
+    if (!(tStart < tEnd)) {
+        redirect('/?error=time');
+    }
+
     await sql`
     INSERT INTO events (title, location, description, start_time, end_time)
     VALUES (${title}, ${location}, ${description || null}, ${start}, ${end})
      `;
     revalidatePath('/');
+    redirect('/');
 }
 
 export async function deleteEvent(form: FormData) {
@@ -37,6 +46,11 @@ export async function deleteEvent(form: FormData) {
 export async function updateEvent(form: FormData) {
     const { id, title, location, description, start, end } =
         Object.fromEntries(form) as Record<string, string>;
+
+    const tStart = new Date(start.replace(' ', 'T'));
+    const tEnd   = new Date(end.replace(' ', 'T'));
+    if (!(tStart < tEnd)) redirect('/?error=time');;
+
     await sql`
     UPDATE events
        SET title = ${title},
@@ -47,4 +61,5 @@ export async function updateEvent(form: FormData) {
      WHERE id = ${id}
   `;
     revalidatePath('/');
+    redirect('/');
 }

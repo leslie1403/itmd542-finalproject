@@ -1,3 +1,4 @@
+import { SearchParams } from 'next/dist/server/request/search-params';
 import { getEvents, createEvent, deleteEvent, updateEvent } from './api/events';
 
 function toInputValue(raw: string | Date) {
@@ -8,12 +9,20 @@ function toInputValue(raw: string | Date) {
   return iso;
 }
 
-export default async function Home() {
+
+export default async function Home({searchParams,}:{searchParams: {error?: string};}) {
   const events = await getEvents();
+  const showErr = searchParams?.error === 'time';
 
   return (
     <main>
       <h1>Event Schedule List</h1>
+
+      {showErr && (
+        <p style={{ color: 'red' }}>
+          The end time is before the start time. Please try again.
+        </p>
+      )}
 
       <form action={createEvent}>
         <input name="title" placeholder="Title" required />
@@ -54,6 +63,7 @@ export default async function Home() {
                     required
                   />
                   <button type="submit">Save</button>
+                  <a href="">Cancel</a>
                 </form>
               </details>
             </li>
@@ -71,15 +81,12 @@ export default async function Home() {
     const [y, m, d] = date.split('-').map(Number);
     const [hh, mm]  = time.split(':').map(Number);
   
-    const monthNames = [
-      'January','February','March','April','May','June',
-      'July','August','September','October','November','December',
-    ];
+    const months = ['January','February','March','April','May','June', 'July','August','September','October','November','December'];
   
     const ampm = hh >= 12 ? 'PM' : 'AM';
     const h12  = hh % 12 || 12;
     const pad  = (n: number) => n.toString().padStart(2, '0');
   
-    return `${monthNames[m - 1]}, ${pad(d)}, ${y}, ${pad(h12)}:${pad(mm)} ${ampm}`;
+    return `${months[m - 1]}, ${pad(d)}, ${y}, ${pad(h12)}:${pad(mm)} ${ampm}`;
   }
 }
