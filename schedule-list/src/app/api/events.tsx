@@ -20,7 +20,6 @@ export async function getEvents(): Promise<EventRow[]> {
 
 export async function createEvent(form: FormData) {
     const { title, location, description, start, end } = Object.fromEntries(form) as Record<string, string>;
-
     await sql`
     INSERT INTO events (title, location, description, start_time, end_time)
     VALUES (${title}, ${location}, ${description || null}, ${start}, ${end})
@@ -28,5 +27,24 @@ export async function createEvent(form: FormData) {
     revalidatePath('/');
 }
 
-export async function updateEvent(_: FormData) { }
-export async function deleteEvent(_: FormData) { }
+export async function deleteEvent(form: FormData) {
+    const { id } = Object.fromEntries(form) as Record<string, string>;
+    await sql`
+    DELETE FROM events WHERE id = ${id}
+    `;
+    revalidatePath('/');
+}
+export async function updateEvent(form: FormData) {
+    const { id, title, location, description, start, end } =
+        Object.fromEntries(form) as Record<string, string>;
+    await sql`
+    UPDATE events
+       SET title = ${title},
+           location = ${location},
+           description = ${description || null},
+           start_time = ${start},
+           end_time = ${end}
+     WHERE id = ${id}
+  `;
+    revalidatePath('/');
+}
